@@ -52,6 +52,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
       avatar: user.avatar,
       isVerified: user.isVerified,
+      token: token
     });
   } else {
     res.status(400);

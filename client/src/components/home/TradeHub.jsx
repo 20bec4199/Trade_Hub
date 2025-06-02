@@ -1,16 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 const TradeHubHome = () => {
   const [showLogin, setShowLogin] = useState(true)
+ 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     remember: false
+  });
+  const [formValue, setFormValue] = useState({
+    email: '',
+    password: '',
+    remember: false
   })
 
+  const { isAuthenticated, user, loading, login, register, logout } = useAuth();
+ 
   const toggleAuthMode = () => setShowLogin(!showLogin)
 
   const handleChange = (e) => {
@@ -21,13 +30,35 @@ const TradeHubHome = () => {
     }))
   }
 
+  const handleChangeLogin = (e) => {
+    const {name, value, type, checked} = e.target;
+    setFormValue(prev => ({
+      ...prev,
+      [name] : type === 'checkbox' ? checked : value
+    }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    const resonse = await axios.post('http://localhost:8000/api/auth/register',formData );
-    console.log(resonse);
-    // Handle auth logic here
-    console.log(formData)
+    try {
+      await register(formData);
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
+  }
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await login(formValue);
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  }
+  
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -45,18 +76,33 @@ const TradeHubHome = () => {
               <Link to="/" className="text-gray-700 hover:text-indigo-600">Home</Link>
               <Link to="/shop" className="text-gray-700 hover:text-indigo-600">Shop</Link>
               <Link to="/about" className="text-gray-700 hover:text-indigo-600">About</Link>
-              <button 
-                onClick={() => setShowLogin(true)}
-                className="px-4 py-2 rounded-md text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition"
-              >
-                Sign In
-              </button>
-              <button 
-                onClick={() => setShowLogin(false)}
-                className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-              >
-                Register
-              </button>
+              
+              {!isAuthenticated ? (
+                <>
+                  <button 
+                    onClick={() => setShowLogin(true)}
+                    className="px-4 py-2 rounded-md text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition"
+                  >
+                    Sign In
+                  </button>
+                  <button 
+                    onClick={() => setShowLogin(false)}
+                    className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                  >
+                    Register
+                  </button>
+                </>
+              ) : (
+                <div className="flex items-center space-x-4">
+                  <span className="text-gray-700">Welcome, {user?.name}</span>
+                  <button 
+                    onClick={logout}
+                    className="px-4 py-2 rounded-md text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
             <button className="md:hidden text-gray-500">
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,219 +114,220 @@ const TradeHubHome = () => {
       </nav>
 
       {/* Hero Section with Auth Form */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="text-center lg:text-left">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Welcome to <span className="text-indigo-600">TradeHub</span>
-            </h1>
-            <p className="text-lg text-gray-600 mb-8 max-w-lg">
-              Your one-stop destination for quality products at amazing prices. Shop with confidence and convenience.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link 
-                to="/shop" 
-                className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md"
-              >
-                Shop Now
-              </Link>
-              <Link 
-                to="/deals" 
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-              >
-                Today's Deals
-              </Link>
-            </div>
-          </div>
-
-          {/* Auth Card */}
-          <div className="bg-white p-8 rounded-xl shadow-lg max-w-md mx-auto w-full">
-            <div className="flex justify-between mb-6 border-b pb-4">
-              <button 
-                onClick={() => setShowLogin(true)}
-                className={`text-lg font-medium ${showLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-              >
-                Sign In
-              </button>
-              <button 
-                onClick={() => setShowLogin(false)}
-                className={`text-lg font-medium ${!showLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
-              >
-                Register
-              </button>
+      {!isAuthenticated && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                Welcome to <span className="text-indigo-600">TradeHub</span>
+              </h1>
+              <p className="text-lg text-gray-600 mb-8 max-w-lg">
+                Your one-stop destination for quality products at amazing prices. Shop with confidence and convenience.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link 
+                  to="/shop" 
+                  className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md"
+                >
+                  Shop Now
+                </Link>
+                <Link 
+                  to="/deals" 
+                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Today's Deals
+                </Link>
+              </div>
             </div>
 
-            {showLogin ? (
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                </div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center">
-                    <input
-                      id="remember"
-                      name="remember"
-                      type="checkbox"
-                      checked={formData.remember}
-                      onChange={handleChange}
-                      className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
-                      Remember me
-                    </label>
-                  </div>
-                  <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
-                    Forgot password?
-                  </Link>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+            {/* Auth Card */}
+            <div className="bg-white p-8 rounded-xl shadow-lg max-w-md mx-auto w-full">
+              <div className="flex justify-between mb-6 border-b pb-4">
+                <button 
+                  onClick={() => setShowLogin(true)}
+                  className={`text-lg font-medium ${showLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
                 >
                   Sign In
                 </button>
-                <div className="mt-4 text-center text-sm text-gray-600">
-                  Don't have an account?{' '}
-                  <button
-                    type="button"
-                    onClick={toggleAuthMode}
-                    className="text-indigo-600 hover:text-indigo-500 font-medium"
-                  >
-                    Register
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                </div>
-                <div className="mb-6">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Password must be at least 8 characters long
-                  </p>
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+                <button 
+                  onClick={() => setShowLogin(false)}
+                  className={`text-lg font-medium ${!showLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
                 >
-                  Create Account
+                  Register
                 </button>
-                <div className="mt-4 text-center text-sm text-gray-600">
-                  Already have an account?{' '}
+              </div>
+
+              {showLogin ? (
+                <form onSubmit={handleLogin}>
+                  <div className="mb-4">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formValue.email}
+                      onChange={handleChangeLogin}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formValue.password}
+                      onChange={handleChangeLogin}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center">
+                      <input
+                        id="remember"
+                        name="remember"
+                        type="checkbox"
+                        checked={formValue.remember}
+                        onChange={handleChangeLogin}
+                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
+                        Remember me
+                      </label>
+                    </div>
+                    <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
+                      Forgot password?
+                    </Link>
+                  </div>
                   <button
-                    type="button"
-                    onClick={toggleAuthMode}
-                    className="text-indigo-600 hover:text-indigo-500 font-medium"
+                    type="submit"
+                    className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
                   >
                     Sign In
                   </button>
-                </div>
-              </form>
-            )}
+                  <div className="mt-4 text-center text-sm text-gray-600">
+                    Don't have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={toggleAuthMode}
+                      className="text-indigo-600 hover:text-indigo-500 font-medium"
+                    >
+                      Register
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-4">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div className="mb-6">
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Password must be at least 8 characters long
+                    </p>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+                  >
+                    Create Account
+                  </button>
+                  <div className="mt-4 text-center text-sm text-gray-600">
+                    Already have an account?{' '}
+                    <button
+                      type="button"
+                      onClick={toggleAuthMode}
+                      className="text-indigo-600 hover:text-indigo-500 font-medium"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                </form>
+              )}
 
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
+              <div className="mt-6">
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">
+                      Or continue with
+                    </span>
+                  </div>
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">
-                    Or continue with
-                  </span>
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0110 4.844c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.933.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.14 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                      <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
+                    </svg>
+                  </button>
                 </div>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path fillRule="evenodd" d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0110 4.844c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.933.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.14 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                    <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-                  </svg>
-                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Featured Products Section */}
       <div className="bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* Product cards would go here */}
             {[1, 2, 3, 4].map((item) => (
               <div key={item} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
                 <div className="bg-gray-200 h-48 flex items-center justify-center">
