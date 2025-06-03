@@ -7,6 +7,7 @@ import TradeHubHome from './components/home/TradeHub';
 import Shop from './components/home/Shop';
 import About from './components/home/About';
 import Profile from './components/home/Profile';
+import Orders from './components/home/Orders';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
        <Route path="/shop" element={<Shop />} />
       <Route path="/about" element={<About />} /> 
        <Route path="/profile" element={<Profile />} /> 
+       <Route path="/orders" element={<Orders />} /> 
     </Routes>
     </AuthProvider>
   )}

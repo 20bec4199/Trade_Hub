@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 
 const TradeHubHome = () => {
   const [showLogin, setShowLogin] = useState(true)
- 
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,7 +19,7 @@ const TradeHubHome = () => {
   })
 
   const { isAuthenticated, user, loading, login, register, logout } = useAuth();
- 
+
   const toggleAuthMode = () => setShowLogin(!showLogin)
 
   const handleChange = (e) => {
@@ -31,10 +31,10 @@ const TradeHubHome = () => {
   }
 
   const handleChangeLogin = (e) => {
-    const {name, value, type, checked} = e.target;
+    const { name, value, type, checked } = e.target;
     setFormValue(prev => ({
       ...prev,
-      [name] : type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value
     }))
   }
 
@@ -55,7 +55,7 @@ const TradeHubHome = () => {
       console.error('Login failed:', error);
     }
   }
-  
+
 
   if (loading) {
     return <div>Loading...</div>;
@@ -64,66 +64,72 @@ const TradeHubHome = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Navigation */}
-     <nav className="bg-white shadow-sm">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div className="flex justify-between h-16 items-center">
-      <div className="flex items-center">
-        <Link to="/" className="text-2xl font-bold text-indigo-600">
-          Trade<span className="text-gray-800">Hub</span>
-        </Link>
-      </div>
-      <div className="hidden md:flex items-center space-x-8">
-        <Link to="/" className="text-gray-700 hover:text-indigo-600">Home</Link>
-        <Link to="/shop" className="text-gray-700 hover:text-indigo-600">Shop</Link>
-        <Link to="/about" className="text-gray-700 hover:text-indigo-600">About</Link>
-        
-        {!isAuthenticated ? (
-          <>
-            <button 
-              onClick={() => setShowLogin(true)}
-              className="px-4 py-2 rounded-md text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition"
-            >
-              Sign In
-            </button>
-            <button 
-              onClick={() => setShowLogin(false)}
-              className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
-            >
-              Register
-            </button>
-          </>
-        ) : (
-          <div className="relative group">
-            <button className="flex items-center space-x-2 focus:outline-none">
-              <span className="text-gray-700">Hi, {user?.name}</span>
-              <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {/* Dropdown Menu */}
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-              <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Profile</Link>
-              <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">My Orders</Link>
-              <Link to="/cart" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Cart</Link>
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16 items-center">
+            <div className="flex items-center">
+              <Link to="/" className="text-2xl font-bold text-indigo-600">
+                Trade<span className="text-gray-800">Hub</span>
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-gray-700 hover:text-indigo-600">Home</Link>
+              <Link to="/shop" className="text-gray-700 hover:text-indigo-600">Shop</Link>
+              <Link to="/about" className="text-gray-700 hover:text-indigo-600">About</Link>
+
+              {!isAuthenticated ? (
+                <>
+                  <button
+                    onClick={() => setShowLogin(true)}
+                    className="px-4 py-2 rounded-md text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => setShowLogin(false)}
+                    className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                  >
+                    Register
+                  </button>
+                </>
+              ) : (
+                <div className="relative group">
+                  <button className="flex items-center space-x-2 focus:outline-none">
+                    <span className="text-gray-700">Hi, {user?.name}</span>
+                    <svg className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
+                    <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Profile</Link>
+                    <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">My Orders</Link>
+                    <Link to="/cart" className="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50">Cart</Link>
+                    <button
+                      onClick={logout}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={logout}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50"
+                className="px-4 py-2 rounded-md text-indigo-600 border border-indigo-600 hover:bg-indigo-50 transition"
               >
                 Logout
               </button>
             </div>
+            <button className="md:hidden text-gray-500">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
           </div>
-        )}
-      </div>
-      <button className="md:hidden text-gray-500">
-        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-    </div>
-  </div>
-</nav>
+        </div>
+      </nav>
 
       {/* Hero Section with Auth Form */}
       {!isAuthenticated && (
@@ -137,14 +143,14 @@ const TradeHubHome = () => {
                 Your one-stop destination for quality products at amazing prices. Shop with confidence and convenience.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link 
-                  to="/shop" 
+                <Link
+                  to="/shop"
                   className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow-md"
                 >
                   Shop Now
                 </Link>
-                <Link 
-                  to="/deals" 
+                <Link
+                  to="/deals"
                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
                 >
                   Today's Deals
@@ -155,13 +161,13 @@ const TradeHubHome = () => {
             {/* Auth Card */}
             <div className="bg-white p-8 rounded-xl shadow-lg max-w-md mx-auto w-full">
               <div className="flex justify-between mb-6 border-b pb-4">
-                <button 
+                <button
                   onClick={() => setShowLogin(true)}
                   className={`text-lg font-medium ${showLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
                 >
                   Sign In
                 </button>
-                <button 
+                <button
                   onClick={() => setShowLogin(false)}
                   className={`text-lg font-medium ${!showLogin ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500'}`}
                 >
