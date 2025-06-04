@@ -9,7 +9,9 @@ const {
   googleLogin,
   googleCallback,
 } = require('../controllers/authController');
+const { updateUserDetails } = require('../controllers/userController');
 const { protect } = require('../middlewares/authMiddleware');
+
 
 
 // Public routes
@@ -23,5 +25,8 @@ router.get('/google/callback', googleCallback);
 
 // Protected routes
 router.get('/me', protect, getMe);
+
+// Update user details
+router.put('/update/user', protect, updateUserDetails );
 
 module.exports = router;
