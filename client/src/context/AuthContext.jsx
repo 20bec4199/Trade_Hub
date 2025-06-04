@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [isAuthenticated, setIsAuthenticated ] = useState(false);
     const [ user, setUser ] = useState(null);
     const [ loading, setLoading ] = useState(true);
+    const [flag, setFlag] = useState(false);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -25,13 +26,14 @@ export const AuthProvider = ({ children }) => {
             }
         };
         checkAuth();
-    }, []);
+    }, [flag]);
 
     const login = async (credentials) => {
         try {
             const response = await axios.post('http://localhost:8000/api/auth/login', credentials, {withCredentials: true});
             setIsAuthenticated(true);
             setUser(response.data);
+            setFlag((prev) => !prev);
             return response;
           } catch (error) {
             console.error('Login failed:', error);
@@ -44,6 +46,7 @@ export const AuthProvider = ({ children }) => {
             const response = await axios.post('http://localhost:8000/api/auth/register', userData, {withCredentials: true});
             setIsAuthenticated(true);
             setUser(response.data);
+            setFlag((prev) => !prev);
             return response;
           } catch (error) {
             console.error('Registration failed:', error);
@@ -56,6 +59,7 @@ export const AuthProvider = ({ children }) => {
             await axios.post('http://localhost:8000/api/auth/logout', {}, {withCredentials: true});
             setIsAuthenticated(false);
             setUser(null);
+            setFlag((prev) => !prev);
           } catch (error) {
             console.error('Logout failed:', error);
           }
@@ -69,7 +73,8 @@ export const AuthProvider = ({ children }) => {
             loading,
             login,
             register,
-            logout
+            logout,
+           
           }}
           >
             {children}
