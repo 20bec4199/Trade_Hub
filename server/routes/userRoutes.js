@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const {
   registerUser,
   loginUser,
@@ -9,10 +8,13 @@ const {
   googleLogin,
   googleCallback,
 } = require('../controllers/authController');
-const { updateUserDetails } = require('../controllers/userController');
+const { 
+  updateUserDetails, 
+  uploadAvatar, 
+  deleteAvatar 
+} = require('../controllers/userController');
 const { protect } = require('../middlewares/authMiddleware');
-
-
+const upload = require('../utils/fileUpload');
 
 // Public routes
 router.post('/register', registerUser);
@@ -24,9 +26,11 @@ router.get('/google', googleLogin);
 router.get('/google/callback', googleCallback);
 
 // Protected routes
-router.get('/me', protect, getMe);
+router.use(protect); // Apply protect middleware to all routes below
 
-// Update user details
-router.put('/update/user', protect, updateUserDetails );
+router.get('/me', getMe);
+router.put('/update/user', updateUserDetails);
+router.post('/upload/avatar', upload.single('avatar'), uploadAvatar);
+router.delete('/avatar', deleteAvatar);
 
 module.exports = router;

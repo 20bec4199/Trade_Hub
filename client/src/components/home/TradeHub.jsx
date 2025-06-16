@@ -21,7 +21,7 @@ const TradeHubHome = () => {
     remember: false
   });
 
-  const { isAuthenticated, loading, login, register } = useAuth();
+  const { isAuthenticated, loading, login, register, error, clearError } = useAuth();
 
   const toggleAuthMode = () => setShowLogin(!showLogin);
 
@@ -116,6 +116,8 @@ const TradeHubHome = () => {
                   handleChangeLogin={handleChangeLogin}
                   handleLogin={handleLogin}
                   toggleAuthMode={toggleAuthMode}
+                  error={error}
+                  clearError={clearError}
                 />
               ) : (
                 <RegisterForm 
@@ -123,6 +125,8 @@ const TradeHubHome = () => {
                   handleChange={handleChange}
                   handleSubmit={handleSubmit}
                   toggleAuthMode={toggleAuthMode}
+                  error={error}
+                  clearError={clearError}
                 />
               )}
 

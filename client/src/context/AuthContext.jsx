@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [ user, setUser ] = useState(null);
     const [ loading, setLoading ] = useState(true);
     const [flag, setFlag] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -37,6 +38,7 @@ export const AuthProvider = ({ children }) => {
             return response;
           } catch (error) {
             console.error('Login failed:', error);
+            setError(error.response?.data?.message || 'Invalid Credentials!.');
             throw error;
           }
     };
@@ -50,6 +52,7 @@ export const AuthProvider = ({ children }) => {
             return response;
           } catch (error) {
             console.error('Registration failed:', error);
+            setError(error.response?.data?.message || 'Registration failed!. Please try again later');
             throw error;
           }
     };
@@ -60,6 +63,7 @@ export const AuthProvider = ({ children }) => {
             setIsAuthenticated(false);
             setUser(null);
             setFlag((prev) => !prev);
+            setError(null);
           } catch (error) {
             console.error('Logout failed:', error);
           }
@@ -70,10 +74,14 @@ export const AuthProvider = ({ children }) => {
           value={{
             isAuthenticated,
             user,
+            error,
             loading,
+            flag,
+            setFlag,
             login,
             register,
             logout,
+            clearError: () => setError(null)
            
           }}
           >

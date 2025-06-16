@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    default: 'https://i.ibb.co/4pDNDk1/avatar.png',
+    default: '',
   },
   googleId: {
     type: String,
